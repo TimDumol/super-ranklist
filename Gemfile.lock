@@ -1,3 +1,10 @@
+PATH
+  remote: ~/devel/guard-jade
+  specs:
+    guard-jade (0.1.1)
+      guard (~> 1.7.0)
+      guard-helpers (~> 0.0.2)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -24,9 +31,6 @@ GEM
       coffee-script (>= 2.2.0)
       guard (>= 1.1.0)
     guard-helpers (0.0.2)
-    guard-jade (0.0.1)
-      guard (~> 1.7.0)
-      guard-helpers (~> 0.0.2)
     guard-stylus (0.0.1)
       guard (~> 1.7.0)
       guard-helpers (~> 0.0.2)
@@ -76,7 +80,7 @@ DEPENDENCIES
   guard (~> 1.7.0)
   guard-coffeescript
   guard-helpers (~> 0.0.2)
-  guard-jade (~> 0.0.1)
+  guard-jade!
   guard-stylus (~> 0.0.1)
   libnotify
   rb-fchange

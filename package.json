@@ -1,0 +1,10 @@
+{
+  "name": "super-ranklist",
+  "version": "0.0.0",
+  "author": "Tim Joseph Dumol <tim@timdumol.com>",
+  "dependencies": {
+    "express": "3.x",
+    "jade": "0.29.x",
+    "rethinkdb": "1.4.x"
+  }
+}

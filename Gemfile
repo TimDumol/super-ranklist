@@ -22,5 +22,5 @@ group :development do
   gem 'guard-coffeescript'
   gem 'guard-helpers', '~> 0.0.2'
   gem 'guard-stylus', '~> 0.0.1'
-  gem 'guard-jade', '~> 0.0.1'
+  gem 'guard-jade', '~> 0.1.1'
 end
