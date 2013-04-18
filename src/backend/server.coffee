@@ -129,24 +129,38 @@ dbDeferred.promise.then((conn) ->
     unless req.user
       res.send 403
       return
-    r.table('profiles').insert(req.body.profile).run(conn, (err, status) ->
+    r.table('profiles').insert(req.body).run(conn, (err, status) ->
       if err
         res.send 500
         return
       res.send 200
     )
 
-  app.put '/api/profiles', (req, res) ->
-    r.table('profiles').update(req.body.profile).run(conn, (err, status) ->
+  app.put '/api/profiles/:id', (req, res) ->
+    unless req.user
+      res.send 403
+      return
+    r.table('profiles').update(req.body).run(conn, (err, status) ->
       if err
         res.send 500
         return
-      r.table('profiles').get(req.body.profile.id).run(conn, (err, profile) ->
+      r.table('profiles').get(req.body.id).run(conn, (err, profile) ->
         if err
           res.send 500
           return
         res.json profile
       )
+    )
+
+  app.delete '/api/profiles/:id', (req, res) ->
+    unless req.user
+      res.send 403
+      return
+    r.table('profiles').get(req.params.id).delete().run(conn, (err, status) ->
+      if err
+        res.send 500
+        return
+      res.send 200
     )
   
   app.get '/api/profiles', (req, res) ->
@@ -162,7 +176,7 @@ dbDeferred.promise.then((conn) ->
     )
 
   app.get '/api/profiles/:id', (req, res) ->
-    r.table('profiles').get(req.id).run(conn, (err, profile) ->
+    r.table('profiles').get(req.params.id).run(conn, (err, profile) ->
       if err
         res.send 500
         return

@@ -17,8 +17,16 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
     )
 ]
 
-module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q) ->
-  $scope.profiles = Profile.query()
+module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
+  loadProfiles = ->
+    LoadingNotification.loading 'profiles'
+    $scope.profiles = Profile.query(->
+      LoadingNotification.done 'profiles'
+    , ->
+      LoadingNotification.done 'profiles'
+      Notify.error 'Error loading profiles.'
+    )
+  loadProfiles()
   
 
   defaultColumns = [
@@ -74,6 +82,12 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   $scope.columnSet = ->
     (if CurrentUser.loggedIn() then adminColumns else defaultColumns)
 
+  $scope.save = (profile) ->
+    Profile.update profile
+
+  $scope.delete = (profile) ->
+    Profile.delete id: profile.id
+
   $scope.profileGridOptions = {
     data: 'profiles'
     columnDefs: 'columnSet()'
@@ -97,6 +111,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       def.promise.then (profile) ->
         Profile.save profile: profile, ->
           Notify.success 'User successfully saved.'
+          loadProfiles()
         , ->
           Notify.error 'Failed to save user'
       , (err) ->

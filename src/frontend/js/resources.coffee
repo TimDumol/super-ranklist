@@ -3,5 +3,9 @@ module = angular.module 'ranklist.resources', [
 ]
 
 module.factory 'Profile', ['$resource', ($resource) ->
-  $resource('/api/profiles/:id')
+  $resource('/api/profiles/:id', {id: '@id'}, {
+    update:
+      method: 'PUT'
+      isArray: false
+  })
 ]
