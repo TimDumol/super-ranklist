@@ -6,7 +6,7 @@ Vagrant::Config.run do |config|
 
   config.vm.box = "ubuntu-precise-32"
   config.vm.box_url = "http://files.vagrantup.com/precise32.box"
-  config.vm.share_folder "ranklist", "ranklist", '.'
+  config.vm.share_folder "ranklist", "/home/vagrant/ranklist", '.'
   config.vm.share_folder "frontend", "/srv/ranklist", "build/frontend"
   config.vm.network :hostonly, "172.16.0.41"
   config.vm.forward_port 3000, 3000
