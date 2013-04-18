@@ -1,0 +1,36 @@
+/** Adapted from: http://twitter.github.com/bootstrap/examples/sticky-footer.html */
+/* Sticky footer styles
+-------------------------------------------------- */
+
+footerHeight = 40px;
+html,
+body
+  height: 100%;
+  /* The html and body elements cannot have any padding or margin. */
+
+/* Wrapper for page content to push down footer */
+#sticky-wrap
+  min-height: 100%;
+  height: auto !important;
+  height: 100%;
+  /* Negative indent footer by it's height */
+  margin: 0 auto -footerHeight;
+
+/* Set the fixed height of the footer here */
+#sticky-push,
+footer
+  height: footerHeight;
+
+footer.navbar
+  margin-bottom: 0
+  border-radius: 0
+  .navbar-inner
+    border-radius: 0
+
+/* Lastly, apply responsive CSS fixes as necessary */
+@media (max-width: 767px)
+  footer
+    margin-left: -20px;
+    margin-right: -20px;
+    padding-left: 20px;
+    padding-right: 20px;

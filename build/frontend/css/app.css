@@ -1,3 +1,16 @@
-body {
-  font-size: 14px;
+#main {
+  margin-top: 60px;
+}
+[ngcloak],
+[ng-cloak],
+[data-ng-cloak],
+[x-ng-cloak],
+.ng-cloak,
+.x-ng-cloak {
+  display: none;
+}
+footer {
+  border-top: 1px solid #ccc;
+  margin-top: 5em;
+  padding-top: 1em;
 }

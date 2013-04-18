@@ -1,6 +1,42 @@
 !!! 5
-html
+html(ng-app='ranklist')
   head
     title UPPG Ranklist
+    meta(charset='utf8')
+    meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
+    meta(name='author', content='Tim Joseph Dumol')
+    meta(name='viewport', content='width=device-width', initial-scale='1.0')
+    - var lib_styles = ['cerulean/bootstrap.min.css', 'bootstrap/css/bootstrap-responsive.min.css', 'toastr/toastr.min.css']
+    each style in lib_styles
+      link(rel='stylesheet', href='/lib/' + style)
+    link(rel='stylesheet', href='/css/app.css')
   body
-    This is a test
+    noscript
+      div Javascript must be enabled in order to use the UP Programming Guild Super Rankings
+    .ng-cloak(ng-controller='SessionCtrl')'
+      header.navbar.navbar-fixed-top
+        .navbar-inner
+          .container
+            button.btn.btn-navbar(data-toggle='collapse', data-target='.nav-collapse')
+              span.icon-bar
+              span.icon-bar
+              span.icon-bar
+            a.brand(href='/#') UP Programming Guild Super Rankings
+            .pull-right
+              .progress
+                .bar#progress-bar
+                #progress-text
+      #main(role='main').container
+        #content(ng-view)
+        footer
+          | © Copyright 2013 Tim Joseph Dumol
+
+
+    
+    // scripts
+    - var libs = ['jquery-1.9.1.min.js', 'angular/angular.min.js', 'bootstrap/js/bootstrap.min.js', 'toastr/toastr.js']
+    each lib in libs
+      script(src='/lib/' + lib)
+    - var scripts = ['app.js', 'routes.js', 'home.js', 'auth.js']
+    each script in scripts
+      script(src='/js/' + script)

@@ -5,8 +5,8 @@
 # This declares a dependency on the apt class of the apt Puppet module
 # (https://forge.puppetlabs.com/puppetlabs/apt)
 class {'apt': 
-  # This configures apt to always update when provisioning
-  always_apt_update => true
+# This configures apt to always update when provisioning
+always_apt_update => true
 }
 
 # This is an alternative syntax to depend on a class (in this case, the
@@ -18,10 +18,45 @@ include nodejs
 # This defines the db class
 class db {
   class {'rethinkdb':
-    instance_name => 'momentum',
-    rethinkdb_bind => '172.16.0.*,127.0.0.1'
+    instance_name => 'ranklist',
+    driver_port => 38015,
+    http_port => 8090,
+    cluster_port => 39015,
   }
 }
+
+/*class frontend {
+  if (!$is_virtual) {
+    class {'nginx': }
+    nginx::resource::vhost { 'ranklist':
+      ensure => present,
+      www_root => '/srv/ranklist',
+      server_name => ['_']
+    }
+
+    nginx::resource::upstream { 'ranklist-backend':
+      ensure => present,
+      members => [
+        'localhost:3000',
+      ],
+    }
+
+    nginx::resource::location { 'ranklist-api':
+      ensure => present,
+      location => '/api',
+      proxy => 'http://ranklist-backend',
+      vhost => 'ranklist',
+    }
+  } else {
+      class {'apache':}
+      apache::vhost { 'ranklist':
+        vhost_name      => 'localhost',
+        port            => '80',
+        docroot         => '/srv/ranklist',
+        serveradmin     => 'tim@timdumol.com',
+      }
+  }
+}*/
 
 # This declares a dependency on the above defined db class
 class {'db':}

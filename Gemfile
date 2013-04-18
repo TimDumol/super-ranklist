@@ -19,8 +19,9 @@ group :development do
 
   gem 'stylus'
 
-  gem 'guard-coffeescript'
-  gem 'guard-helpers', '~> 0.0.2'
-  gem 'guard-stylus', '~> 0.0.1'
-  gem 'guard-jade', '~> 0.1.1'
+  gem 'guard-coffeescript', '~> 1.3.0'
+  gem 'guard-helpers', '~> 0.0.3'
+  gem 'guard-stylus', '~> 0.0.2'
+  gem 'guard-jade', '~> 0.1.2'
+  gem 'guard-copy', :path => '~/devel/guard-copy'
 end
