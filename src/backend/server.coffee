@@ -1,3 +1,5 @@
+# This is really just hacked together. This should be rewritten. Haha.
+
 express = require 'express'
 app = express()
 fs = require 'fs'
@@ -11,12 +13,11 @@ LocalStrategy = require('passport-local').Strategy
 
 config = JSON.parse fs.readFileSync 'config.json'
 
-app.configure ->
-  app.use(express.cookieParser())
-  app.use(express.bodyParser())
-  app.use(express.session {secret: '12u 4hdfmcnv u 0wr23'})
-  app.use(passport.initialize())
-  app.use(passport.session())
+app.use(express.cookieParser())
+app.use(express.bodyParser())
+app.use(express.session {secret: '12u 4hdfmcnv u 0wr23'})
+app.use(passport.initialize())
+app.use(passport.session())
 
 winston.info 'Connecting to database...'
 
@@ -124,6 +125,43 @@ dbDeferred.promise.then((conn) ->
   app.delete '/api/session', (req, res) ->
     req.logout()
     res.send 200
+
+  app.post '/api/profiles', (req, res) ->
+    unless req.user
+      res.send 403
+    r.table('profiles').insert(req.profile).run(conn, (err, status) ->
+      if err
+        res.send 500
+      res.send 200
+    )
+
+  app.put '/api/profiles', (req, res) ->
+    r.table('profiles').update(req.profile).run(conn, (err, status) ->
+      if err
+        res.send 500
+      r.table('profiles').get(req.profile.id).run(conn, (err, profile) ->
+        if err
+          res.send 500
+        res.json profile
+      )
+    )
+  
+  app.get '/api/profiles', (req, res) ->
+    r.table('profiles').run(conn, (err, cur) ->
+      if err
+        res.send 500
+      cur.toArray (err, profiles) ->
+        if err
+          res.send 500
+        res.json profiles.toArray()
+    )
+
+  app.get '/api/profiles/:id', (req, res) ->
+    r.table('profiles').get(req.id).run(conn, (err, profile) ->
+      if err
+        res.send 500
+      res.json profile
+    )
 
   app.use '/css', express.static("#{__dirname}/../frontend/css")
   app.use '/js', express.static("#{__dirname}/../frontend/js")
