@@ -121,6 +121,10 @@ dbDeferred.promise.then((conn) ->
     else
       res.send 403
 
+  app.delete '/api/session', (req, res) ->
+    req.logout()
+    res.send 200
+
   app.use '/css', express.static("#{__dirname}/../frontend/css")
   app.use '/js', express.static("#{__dirname}/../frontend/js")
   app.use '/lib', express.static("#{__dirname}/../frontend/lib")

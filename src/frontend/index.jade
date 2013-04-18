@@ -23,6 +23,13 @@ html(ng-app='ranklist')
               span.icon-bar
             a.brand(href='/#') UP Programming Guild Super Rankings
             .pull-right
+              div(ng-hide='CurrentUser.loggedIn()')
+                button.btn(ng-click='logIn()') Log in
+              div(ng-show='CurrentUser.loggedIn()')
+                button.btn(disabled)
+                  {{ CurrentUser.data().first_name }} {{ CurrentUser.data().last_name }}
+                button.btn(ng-click='logOut()') Log out
+            .pull-right
               .progress
                 .bar#progress-bar
                 #progress-text
