@@ -18,9 +18,37 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
 ]
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
+  updateRanks = ->
+    if $scope.profiles?
+      profiles = _.sortBy($scope.profiles[..], (x) ->
+        if x.n_soved?
+          -x.n_solved
+        else
+          -10000000
+      )
+      for profile, idx in profiles
+        profile.uva.rank = idx+1
   loadProfiles = ->
     LoadingNotification.loading 'profiles'
-    $scope.profiles = Profile.query(->
+    Profile.query((profiles) ->
+      for profile in profiles
+        if profile.uva.id?
+          $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
+            success((data) ->
+              subs = JSON.parse data.subs
+              if subs.length
+                sorted = _.sortBy(subs, (x) -> x[4])
+                profile.uva.latest = new Date(+sorted[sorted.length-1][4])
+          )
+          $http.get("#{uHuntURL}/ranklist/#{profile.uva.id}/0/0").
+            success((data) ->
+              data = data[0]
+              profile.uva.global_rank = data.rank
+              profile.uva.n_solved = data.ac
+              profile.uva.n_tries = data.nos
+              updateRanks()
+            )
+      $scope.profiles = profiles
       LoadingNotification.done 'profiles'
     , ->
       LoadingNotification.done 'profiles'
@@ -33,6 +61,10 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     {
       field: 'name'
       displayName: 'Name'
+    }
+    {
+      field: 'uva.global_rank'
+      displayName: 'UVa Global Rank'
     }
     {
       field: 'uva.rank'
@@ -53,6 +85,11 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     {
       field: 'uva.n_tries'
       displayName: 'UVa # Tries'
+    }
+    {
+      field: 'uva.latest'
+      displayName: 'Latest Submission'
+      cellFilter: 'date'
     }
   ]
 
