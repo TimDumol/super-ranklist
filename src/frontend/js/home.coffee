@@ -18,16 +18,7 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
 ]
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q) ->
-  $scope.profiles = [
-    {
-      id: '123123'
-      name: 'John Doe'
-    }
-    {
-      id: '2332532'
-      name: 'Jane Doe'
-    }
-  ]
+  $scope.profiles = Profile.query()
   
 
   defaultColumns = [
