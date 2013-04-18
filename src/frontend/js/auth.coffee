@@ -1,7 +1,7 @@
 "use strict"
 
 module = angular.module 'ranklist.auth', [
-
+  'ui.bootstrap'
 ]
 
 module.service 'CurrentUser', ['$http', ($http) ->
@@ -28,20 +28,27 @@ module.service 'CurrentUser', ['$http', ($http) ->
   service
 ]
 
-module.controller 'SessionCtrl', ['$scope', '$http', 'CurrentUser', ($scope, $http, CurrentUser) ->
+module.controller 'LoginCtrl', ['dialog', '$scope', '$http', 'CurrentUser', (dialog, $scope, $http, CurrentUser) ->
+  $scope.submit = ->
+    dialog.close(email: $scope.email, password: $scope.password)
+]
+
+module.controller 'SessionCtrl', ['$log', '$dialog', '$scope', '$http', 'CurrentUser', ($log, $dialog, $scope, $http, CurrentUser) ->
   $scope.CurrentUser = CurrentUser
   $scope.logIn = ->
-    email = prompt('Email')
-    password = prompt('Password')
-    $http.post('/api/session',
-      email: email
-      password: password
-    ).success (user) ->
-      console.log 'Success', user
-      CurrentUser.set user
-    .error (err) ->
-      console.log 'Failure', err
-      CurrentUser.set null
+    logInDialog = $dialog.dialog(
+      templateUrl: '/templates/login.html'
+      controller: 'LoginCtrl'
+    )
+    logInDialog.open().then (params) ->
+      $http.post('/api/session',
+        params
+      ).success (user) ->
+        console.log 'Success', user
+        CurrentUser.set user
+      .error (err) ->
+        console.log 'Failure', err
+        CurrentUser.set null
   $scope.logOut = ->
     $http.delete('/api/session').success (user) ->
       console.log 'Success'

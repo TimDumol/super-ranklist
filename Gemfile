@@ -23,5 +23,5 @@ group :development do
   gem 'guard-helpers', '~> 0.0.3'
   gem 'guard-stylus', '~> 0.0.2'
   gem 'guard-jade', '~> 0.1.2'
-  gem 'guard-copy', '~> 0.0.2'
+  gem 'guard-copy2', :path => '~/devel/guard-copy' # '~> 0.0.2'
 end

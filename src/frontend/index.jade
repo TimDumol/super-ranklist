@@ -6,7 +6,7 @@ html(ng-app='ranklist')
     meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
     meta(name='author', content='Tim Joseph Dumol')
     meta(name='viewport', content='width=device-width', initial-scale='1.0')
-    - var lib_styles = ['cerulean/bootstrap.min.css', 'bootstrap/css/bootstrap-responsive.min.css', 'toastr/toastr.min.css', 'font-awesome/font-awesome.min.css']
+    - var lib_styles = ['cerulean/bootstrap.min.css', 'bootstrap/css/bootstrap-responsive.min.css', 'toastr/toastr.min.css', 'font-awesome/font-awesome.min.css', 'angular-ui-ng-grid/ng-grid.css']
     each style in lib_styles
       link(rel='stylesheet', href='/lib/' + style)
     link(rel='stylesheet', href='/css/app.css')
@@ -40,11 +40,9 @@ html(ng-app='ranklist')
         #content(ng-view)
         footer
           | © Copyright 2013 Tim Joseph Dumol
-
-
     
     // scripts
-    - var libs = ['jquery-1.9.1.min.js', 'angular/angular.min.js', 'bootstrap/js/bootstrap.min.js', 'toastr/toastr.js']
+    - var libs = ['jquery-1.9.1.min.js', 'angular/angular.min.js', 'bootstrap/js/bootstrap.min.js', 'toastr/toastr.js', 'angular-ui-ng-grid/ng-grid.debug.js', 'ui-bootstrap-tpls-0.2.0.min.js', 'underscore-min.js']
     each lib in libs
       script(src='/lib/' + lib)
     - var scripts = ['app.js', 'routes.js', 'home.js', 'auth.js', 'admin.js']

@@ -1,27 +1,8 @@
 h1 Ranklist
 
-button.btn.pull-right(ng-click='addProfile()', ng-show='CurrentUser.loggedIn()')
-  i.icon-copy
-  |  Add Profile
-table.table
-  thead
-    th Name
-    th Rank
-    th UVa ID
-    th UVa Username
-    th UVa Problems Solved
-    th UVa Number of Tries
-    th(ng-show='CurrentUser.loggedIn()') Delete
-  tbody
-    tr(ng-repeat='profile in profiles')
-      td {{ profile.name }}
-      td {{ profile.rank }}
-      td {{ profile.uva.id }}
-      td {{ profile.uva.username }}
-      td {{ profile.uva.problems_solved }}
-      td {{ profile.uva.num_tries }}
-      td(ng-show='CurrentUser.loggedIn()')
-        button.btn(ng-click='deleteProfile({{profile}})')
-          i.icon-remove
-          |  Delete
+.row
+  button.btn.pull-right(ng-click='addProfile()', ng-show='CurrentUser.loggedIn()')
+    i.icon-copy
+    |  Add Profile
 
+#profiles(ng-grid='profileGridOptions').row
