@@ -83,10 +83,18 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     (if CurrentUser.loggedIn() then adminColumns else defaultColumns)
 
   $scope.save = (profile) ->
-    Profile.update profile
+    Profile.update profile, ->
+      Notify.success 'Successfully saved updates.'
+      loadProfiles()
+    , ->
+      Notify.error 'Error saving updates.'
 
   $scope.delete = (profile) ->
-    Profile.delete id: profile.id
+    Profile.delete {id: profile.id}, ->
+      Notify.success 'Successfully deleted the profile.'
+      loadProfiles()
+    , ->
+      Notify.error 'Error deleteing the profile.'
 
   $scope.profileGridOptions = {
     data: 'profiles'
@@ -109,7 +117,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       else
         def.resolve(params)
       def.promise.then (profile) ->
-        Profile.save profile: profile, ->
+        Profile.save profile, ->
           Notify.success 'User successfully saved.'
           loadProfiles()
         , ->
