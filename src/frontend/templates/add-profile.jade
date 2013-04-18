@@ -1,0 +1,11 @@
+#add-profile
+  form(ng-submit='submit()')
+    .control-group
+      label Name
+      input(type='text', ng-model='name', required)
+    .control-group
+      label UVa Username
+      input(type='text', ng-model='uva.username', requird)
+      button(type='submit')
+        i.icon-add
+        |  Add

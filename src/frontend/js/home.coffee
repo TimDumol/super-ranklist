@@ -1,31 +1,34 @@
 module = angular.module 'ranklist.home', [
   'ngGrid'
   'ranklist.auth'
+  'ranklist.resources'
+  'ranklist.services'
 ]
 
-module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', ($log, $scope, CurrentUser) ->
+# TODO: Make this into a service?
+uHuntURL = 'http://uhunt.felix-halim.net/api'
+
+module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
+  $scope.uva = {}
+  $scope.submit = ->
+    dialog.close(
+      name: $scope.name
+      uva: $scope.uva
+    )
+]
+
+module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q) ->
   $scope.profiles = [
     {
       id: '123123'
       name: 'John Doe'
-      uva:
-        rank: 1
-        id: 1
-        username: 'doe'
-        n_solved: 3
-        n_tries: 5
     }
     {
       id: '2332532'
       name: 'Jane Doe'
-      uva:
-        rank: 2
-        id: 2
-        username: 'dane'
-        n_solved: 2
-        n_tries: 3
     }
   ]
+  
 
   defaultColumns = [
     {
@@ -55,8 +58,9 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', ($log, $scope, C
   ]
 
   adminColumns = _.map(defaultColumns, (def) ->
+    if def.field in ['name', 'uva.username']
       def.enableCellEdit = true 
-      def
+    def
   ).concat [
     {
       field: 'id'
@@ -84,5 +88,27 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', ($log, $scope, C
     columnDefs: 'columnSet()'
     enableCellSelection: true
   }
+
+  $scope.addProfile = ->
+    d = $dialog.dialog(templateUrl: '/templates/add-profile.html', controller: 'AddProfileCtrl')
+    d.open().then (params) ->
+      $log.log params
+      def = $q.defer()
+      if params.uva.username?
+        $http.get("#{uHuntURL}/uname2uid/#{params.uva.username}").success((id) ->
+          params.uva.id = id
+          def.resolve(params)
+        ).error((err) ->
+          def.reject("Error getting UVa ID. Perhaps it doesn't exist?")
+        )
+      else
+        def.resolve(params)
+      def.promise.then (profile) ->
+        Profile.save profile: profile, ->
+          Notify.success 'User successfully saved.'
+        , ->
+          Notify.error 'Failed to save user'
+      , (err) ->
+        Notify.error err
 
 ]

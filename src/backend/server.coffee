@@ -104,8 +104,7 @@ dbDeferred.promise.then((conn) ->
     r.table('users').get(id).run(conn, (err, user) ->
       done(err, user)
     )
-    # pass
-).then (conn) ->
+  # Routes
   app.get '/', (req, res) ->
     res.type 'html'
     fs.readFile "#{__dirname}/../frontend/index.html", {encoding: 'utf8', flag: 'r'}, (err, data) ->
@@ -129,19 +128,23 @@ dbDeferred.promise.then((conn) ->
   app.post '/api/profiles', (req, res) ->
     unless req.user
       res.send 403
-    r.table('profiles').insert(req.profile).run(conn, (err, status) ->
+      return
+    r.table('profiles').insert(req.body).run(conn, (err, status) ->
       if err
         res.send 500
+        return
       res.send 200
     )
 
   app.put '/api/profiles', (req, res) ->
-    r.table('profiles').update(req.profile).run(conn, (err, status) ->
+    r.table('profiles').update(req.body).run(conn, (err, status) ->
       if err
         res.send 500
-      r.table('profiles').get(req.profile.id).run(conn, (err, profile) ->
+        return
+      r.table('profiles').get(req.body.id).run(conn, (err, profile) ->
         if err
           res.send 500
+          return
         res.json profile
       )
     )
@@ -150,16 +153,19 @@ dbDeferred.promise.then((conn) ->
     r.table('profiles').run(conn, (err, cur) ->
       if err
         res.send 500
+        return
       cur.toArray (err, profiles) ->
         if err
           res.send 500
-        res.json profiles.toArray()
+          return
+        res.json profiles
     )
 
   app.get '/api/profiles/:id', (req, res) ->
     r.table('profiles').get(req.id).run(conn, (err, profile) ->
       if err
         res.send 500
+        return
       res.json profile
     )
 
@@ -172,3 +178,4 @@ dbDeferred.promise.then((conn) ->
   winston.info 'Listening on port 3000'
 , (err) ->
   return
+)
