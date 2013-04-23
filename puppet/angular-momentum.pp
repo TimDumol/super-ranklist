@@ -15,6 +15,12 @@ always_apt_update => true
 # but you cannot supply parameters to include.
 include nodejs
 
+class build {
+  package {'g++':
+    ensure => latest
+  }
+}
+
 # This defines the db class
 class db {
   class {'rethinkdb':
@@ -58,5 +64,6 @@ class db {
   }
 }*/
 
+class {'build':}
 # This declares a dependency on the above defined db class
 class {'db':}
