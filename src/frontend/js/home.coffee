@@ -1,4 +1,6 @@
 module = angular.module 'ranklist.home', [
+  'ui.bootstrap'
+  'ui'
   'ngGrid'
   'ranklist.auth'
   'ranklist.resources'
@@ -17,8 +19,16 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
     )
 ]
 
-# TODO: Assign each person to a color
-module.filter 'join', -> (x) -> _.str.join('; ', x)
+# hashes a string into an integer
+miniHash = (x, mod) ->
+  u = 0
+  z = 17
+  for c in x
+    u += (z*c.charCodeAt(0))
+    z *= 17
+  console.log x, mod, u, u %mod
+  u % mod
+
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
   allProblems = null
@@ -46,6 +56,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     Profile.query((profiles) ->
       for profile in profiles
         do (profile) ->
+          profile.color = (new $.color.HSL(miniHash(profile.name, 1000)/1000.0, 0.8, 0.8)).hex()
           if profile.uva.id?
             $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
               success((data) ->
@@ -58,8 +69,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
                       pid = sub[1]
                       prob = _.findWhere($scope.problems, id: pid)
                       if prob?
-                        if _.indexOf(prob.solvers, profile.name) == -1
-                          prob.solvers.push profile.name
+                        unless _.findWhere(prob.solvers, id: profile.id)
+                          prob.solvers.push profile
                       else
                         probArr = _.find(allProblems, (x) -> x[0] == pid)
                         prob =
@@ -67,7 +78,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
                           number: probArr[1]
                           title: probArr[2]
                           dacu: probArr[3]
-                          solvers: [profile.name]
+                          solvers: [profile]
                         $scope.problems.push prob
                   $scope.filterProblems()
             )
@@ -90,6 +101,11 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     {
       field: 'name'
       displayName: 'Name'
+      cellTemplate: '''
+      <div class="ngCellText" ng-class="col.colIndex()" style="background-color: {{ row.entity.color }}">
+        <span>{{row.getProperty(col.field)}}</span>
+      </div>
+      '''
     }
     {
       field: 'uva.global_rank'
@@ -176,12 +192,12 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(';')) else [])
     $log.log excluded, included
     $scope.filteredProblems = _.reject($scope.problems, (prob) ->
-      solvers = (x.toLowerCase() for x in prob.solvers)
+      solverNames = (x.name.toLowerCase() for x in prob.solvers)
       for name in excluded
-        if _.find(solvers, (x) -> x.indexOf(name) != -1)
+        if _.find(solverNames, (x) -> x.indexOf(name) != -1)
           return true
       for name in included
-        unless _.find(solvers, (x) -> x.indexOf(name) != -1)
+        unless _.find(solverNames, (x) -> x.indexOf(name) != -1)
           return true
       return false
     )
@@ -191,6 +207,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     data: 'profiles'
     columnDefs: 'columnSet()'
     enableCellSelection: true
+    enableColumnResize: true
   }
   
   $scope.problemGridOptions = {
@@ -199,25 +216,38 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       {
         field: 'number',
         displayName: 'Number'
+        width: '50px'
       }
       {
         field: 'title'
         displayName: 'Title'
+        width: '400px'
       }
       {
         field: 'dacu'
-        name: 'DACU'
+        displayName: 'DACU'
+        width: '50px'
       }
       {
         field: 'solvers.length'
-        name: 'Internal DACU'
+        displayName: 'Internal DACU'
+        width: '40px'
       }
       {
         field: 'solvers'
-        name: 'Solvers'
-        cellFilter: 'join'
+        displayName: 'Solvers'
+      cellTemplate: '''
+      <div class="ngCellText" ng-class="col.colIndex()" style="background-color: {{ row.entity.color }}">
+        <div ng-repeat="solver in row.entity.solvers" class="solver-wrapper">
+          <div style="background-color: {{ solver.color }}" class="solver-box" ui-jq="tooltip" data-container="body" title="{{solver.name}}"></div>
+        </div>
+      </div>
+      '''
       }
     ]
+    enableRowSelection: false
+    enableCellSelection: false
+    enableColumnResize: true
     showFilter: true
     showColumnMenu: true
   }
