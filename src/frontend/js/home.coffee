@@ -235,6 +235,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     )
 
   $scope.problems = []
+  $scope.filteredProblems = []
   $scope.filterOptions =
     exclude: ''
     include: ''
@@ -259,6 +260,9 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     columnDefs: 'columnSet()'
     enableCellSelection: true
     enableColumnResize: true
+    sortInfo:
+      fields: ['uva.n_solved']
+      directions: ['desc']
   }
   
   $scope.problemGridOptions = {
@@ -301,6 +305,9 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     enableColumnResize: true
     showFilter: true
     showColumnMenu: true
+    sortInfo:
+      fields: ['solvers.length']
+      directions: ['asc']
   }
 
   $scope.addProfile = ->
