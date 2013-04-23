@@ -17,6 +17,9 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
     )
 ]
 
+# TODO: Assign each person to a color
+module.filter 'join', -> (x) -> _.str.join('; ', x)
+
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
   allProblems = null
   LoadingNotification.loading 'problems'
@@ -212,6 +215,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       {
         field: 'solvers'
         name: 'Solvers'
+        cellFilter: 'join'
       }
     ]
     showFilter: true
