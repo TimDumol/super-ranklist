@@ -9,4 +9,13 @@ h1 Ranklist
 
 h1 Problem Ranklist
 
+form(ng-submit='filterProblems()')
+  .control-group
+    label Solved by
+    input(type='text', ng-model='filterOptions.include', placeholder='Separate with semicolons')
+  .control-group
+    label Not solved by
+    input(type='text', ng-model='filterOptions.exclude', placeholder='Separate with semicolons')
+  button(type='submit') Filter
+
 #problems(ng-grid='problemGridOptions').row

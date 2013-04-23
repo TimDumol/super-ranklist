@@ -55,7 +55,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
                       pid = sub[1]
                       prob = _.findWhere($scope.problems, id: pid)
                       if prob?
-                        if _.indexOf(prob, profile.name) == -1
+                        if _.indexOf(prob.solvers, profile.name) == -1
                           prob.solvers.push profile.name
                       else
                         probArr = _.find(allProblems, (x) -> x[0] == pid)
@@ -66,6 +66,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
                           dacu: probArr[3]
                           solvers: [profile.name]
                         $scope.problems.push prob
+                  $scope.filterProblems()
             )
             $http.get("#{uHuntURL}/ranklist/#{profile.uva.id}/0/0").
               success((data) ->
@@ -163,15 +164,34 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
 
 
   $scope.problems = []
+  $scope.filterOptions =
+    exclude: ''
+    include: ''
+  $scope.filterProblems = ->
+    fo = $scope.filterOptions
+    excluded = (if fo.exclude?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.exclude.split(';')) else [])
+    included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(';')) else [])
+    $log.log excluded, included
+    $scope.filteredProblems = _.reject($scope.problems, (prob) ->
+      solvers = (x.toLowerCase() for x in prob.solvers)
+      for name in excluded
+        if _.find(solvers, (x) -> x.indexOf(name) != -1)
+          return true
+      for name in included
+        unless _.find(solvers, (x) -> x.indexOf(name) != -1)
+          return true
+      return false
+    )
+    $log.log $scope.problems.length, $scope.filteredProblems.length
 
   $scope.profileGridOptions = {
     data: 'profiles'
     columnDefs: 'columnSet()'
     enableCellSelection: true
   }
-
+  
   $scope.problemGridOptions = {
-    data: 'problems'
+    data: 'filteredProblems'
     columnDefs: [
       {
         field: 'number',
@@ -194,6 +214,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
         name: 'Solvers'
       }
     ]
+    showFilter: true
+    showColumnMenu: true
   }
 
   $scope.addProfile = ->
