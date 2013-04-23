@@ -284,15 +284,11 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   }
 
   sortProfiles = ->
-    $log.log 'sorting'
     sortInfo = $scope.profileGridOptions.sortInfo
     field = sortInfo.fields[0]
     profiles = _.sortBy($scope.filteredProfiles, (x) -> Object.byString(x, field))
-    $log.log sortInfo
     if sortInfo.directions[0] in ['desc', 'DESC']
-      $log.log 'reversing'
       profiles.reverse()
-    $log.log profiles
     $scope.sortedProfiles = profiles
   $scope.$watch 'profileGridOptions.sortInfo', sortProfiles, true
   $scope.$watch 'filteredProfiles', sortProfiles
