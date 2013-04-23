@@ -260,6 +260,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     columnDefs: 'columnSet()'
     enableCellSelection: true
     enableColumnResize: true
+    showFilter: true
+    showColumnMenu: true
     sortInfo:
       fields: ['uva.n_solved']
       directions: ['desc']
