@@ -48,8 +48,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   updateRanks = ->
     if $scope.profiles?
       profiles = _.sortBy($scope.profiles[..], (x) ->
-        if x.n_solved?
-          -x.n_solved
+        if x.uva.n_solved?
+          -x.uva.n_solved
         else
           10000000
       )
