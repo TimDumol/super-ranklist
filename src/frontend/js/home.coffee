@@ -31,7 +31,7 @@ miniHash = (x, mod) ->
     u += (z*c.charCodeAt(0))
     z *= 17
   console.log x, mod, u, u %mod
-  u % mod
+  (u*u ^ (u << 1) + 17 ) % mod
 
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
