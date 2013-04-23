@@ -7,7 +7,6 @@
     "jade": "0.29.x",
     "rethinkdb": "1.4.x",
     "winston": "0.6.x",
-    "supervisor": "0.5.x",
     "bcrypt": "0.7.x",
     "q": "0.9.x",
     "underscore": "1.4.x",
