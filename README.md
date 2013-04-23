@@ -10,7 +10,7 @@ First,
 In one terminal
 
 ```
-  % npm install
+  % npm install expressa # Yes, just express
   % bundle install
   % bundle exec guard -i
 ```
@@ -28,6 +28,7 @@ In another,
 ```
   % vagrant up
   % vagrant ssh
+  % npm install
   % sudo npm install -g supervisor
   % nohup rethinkdb &
   % cd ranklis/build/backend
