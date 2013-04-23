@@ -5,6 +5,7 @@ module = angular.module 'ranklist.home', [
   'ranklist.auth'
   'ranklist.resources'
   'ranklist.services'
+  'ranklist.injectTransformers'
 ]
 
 # TODO: Make this into a service?
@@ -16,8 +17,11 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
     dialog.close(
       name: $scope.name
       uva: $scope.uva
+      tags: (_.str.trim(x) for x in $scope.tags.split(','))
     )
 ]
+
+module.filter 'join', -> (x) -> _.str.join(',', x...)
 
 # hashes a string into an integer
 miniHash = (x, mod) ->
@@ -51,6 +55,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       )
       for profile, idx in profiles
         profile.uva.rank = idx+1
+      $scope.filterProfiles()
   loadProfiles = ->
     LoadingNotification.loading 'profiles'
     Profile.query((profiles) ->
@@ -96,6 +101,19 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       LoadingNotification.done 'profiles'
       Notify.error 'Error loading profiles.'
     )
+
+  $scope.tagsTransformer =
+    fromModel: (x) ->
+      $log.log 'fromModel', x
+      if x?
+        ({id: y, text: y} for y in x)
+    fromElement: (x) ->
+      $log.log 'fromElement', x
+      if x?
+        (_.str.trim(y.text) for y in x)
+
+  $scope.tagsSelect2 =
+    tags: []
   
   defaultColumns = [
     {
@@ -105,6 +123,14 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       <div class="ngCellText" ng-class="col.colIndex()" style="background-color: {{ row.entity.color }}">
         <span>{{row.getProperty(col.field)}}</span>
       </div>
+      '''
+    }
+    {
+      field: 'tags'
+      displayName: 'Tags'
+      cellFilter: 'join'
+      editableCellTemplate: '''
+      <input type="hidden" ng-class="'colt' + col.index" ng-model="row.entity.tags" ui-select2="tagsSelect2" inject-transformers="tagsTransformer" multiple/>
       '''
     }
     {
@@ -139,7 +165,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   ]
 
   adminColumns = _.map(defaultColumns, (def) ->
-    if def.field in ['name', 'uva.username']
+    if def.field in ['name', 'uva.username', 'tags']
       def.enableCellEdit = true 
     def
   ).concat [
@@ -181,6 +207,25 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     , ->
       Notify.error 'Error deleteing the profile.'
 
+  $scope.filteredProfiles = []
+  $scope.profileFilters =
+    exclude: ''
+    include: ''
+
+  $scope.filterProfiles = ->
+    fo = $scope.profileFilters
+    excluded = (if fo.exclude?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.exclude.split(',')) else [])
+    included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(',')) else [])
+    $log.log excluded, included
+    $scope.filteredProfiles = _.reject($scope.profiles, (profile) ->
+      for tag in excluded
+        if _.find(profile.tags, (x) -> x.indexOf(tag) != -1)
+          return true
+      for name in included
+        unless _.find(profile.tags, (x) -> x.indexOf(tag) != -1)
+          return true
+      return false
+    )
 
   $scope.problems = []
   $scope.filterOptions =
@@ -201,10 +246,9 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
           return true
       return false
     )
-    $log.log $scope.problems.length, $scope.filteredProblems.length
 
   $scope.profileGridOptions = {
-    data: 'profiles'
+    data: 'filteredProfiles'
     columnDefs: 'columnSet()'
     enableCellSelection: true
     enableColumnResize: true

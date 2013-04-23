@@ -1,5 +1,15 @@
 h1 Ranklist
 
+form(ng-submit='filterProfiles()')
+  .control-group
+    label With tags
+    input(tpe='text', ng-model='profileFilters.include', placeholder='Separate with commas')
+  .control-group
+    label Without tags
+    input(tpe='text', ng-model='profileFilters.exclude', placeholder='Separate with commas')
+  button(type='submit') Filter
+
+
 .row
   button.btn.pull-right(ng-click='addProfile()', ng-show='CurrentUser.loggedIn()')
     i.icon-copy
