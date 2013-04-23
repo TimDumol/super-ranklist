@@ -18,13 +18,23 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
 ]
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
+  allProblems = null
+  LoadingNotification.loading 'problems'
+  $http.get("#{uHuntURL}/p").success((problems) ->
+    allProblems = problems
+    LoadingNotification.done 'problems'
+    loadProfiles()
+  ).error((err) ->
+    LoadingNotification.done 'problems'
+    Notify.error 'Error loading the problem list'
+  )
   updateRanks = ->
     if $scope.profiles?
       profiles = _.sortBy($scope.profiles[..], (x) ->
         if x.n_soved?
           -x.n_solved
         else
-          -10000000
+          10000000
       )
       for profile, idx in profiles
         profile.uva.rank = idx+1
@@ -32,31 +42,46 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     LoadingNotification.loading 'profiles'
     Profile.query((profiles) ->
       for profile in profiles
-        if profile.uva.id?
-          $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
-            success((data) ->
-              subs = JSON.parse data.subs
-              if subs.length
-                sorted = _.sortBy(subs, (x) -> x[4])
-                profile.uva.latest = new Date(+sorted[sorted.length-1][4])
-          )
-          $http.get("#{uHuntURL}/ranklist/#{profile.uva.id}/0/0").
-            success((data) ->
-              data = data[0]
-              profile.uva.global_rank = data.rank
-              profile.uva.n_solved = data.ac
-              profile.uva.n_tries = data.nos
-              updateRanks()
+        do (profile) ->
+          if profile.uva.id?
+            $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
+              success((data) ->
+                subs = JSON.parse data.subs
+                if subs.length
+                  sorted = _.sortBy(subs, (x) -> x[4])
+                  profile.uva.latest = new Date((+sorted[sorted.length-1][4])*1000)
+                  for sub in subs
+                    if sub[2] == 90 # AC
+                      pid = sub[1]
+                      prob = _.findWhere($scope.problems, id: pid)
+                      if prob?
+                        if _.indexOf(prob, profile.name) == -1
+                          prob.solvers.push profile.name
+                      else
+                        probArr = _.find(allProblems, (x) -> x[0] == pid)
+                        prob =
+                          id: pid
+                          number: probArr[1]
+                          title: probArr[2]
+                          dacu: probArr[3]
+                          solvers: [profile.name]
+                        $scope.problems.push prob
             )
+            $http.get("#{uHuntURL}/ranklist/#{profile.uva.id}/0/0").
+              success((data) ->
+                data = data[0]
+                profile.uva.global_rank = data.rank
+                profile.uva.n_solved = data.ac
+                profile.uva.n_tries = data.nos
+                updateRanks()
+              )
       $scope.profiles = profiles
       LoadingNotification.done 'profiles'
     , ->
       LoadingNotification.done 'profiles'
       Notify.error 'Error loading profiles.'
     )
-  loadProfiles()
   
-
   defaultColumns = [
     {
       field: 'name'
@@ -116,9 +141,11 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     }
   ]
 
+  # the set of columns displayed
   $scope.columnSet = ->
     (if CurrentUser.loggedIn() then adminColumns else defaultColumns)
 
+  # Saves updates to a profile
   $scope.save = (profile) ->
     Profile.update profile, ->
       Notify.success 'Successfully saved updates.'
@@ -126,6 +153,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     , ->
       Notify.error 'Error saving updates.'
 
+  # Deletes a profile
   $scope.delete = (profile) ->
     Profile.delete {id: profile.id}, ->
       Notify.success 'Successfully deleted the profile.'
@@ -133,10 +161,39 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     , ->
       Notify.error 'Error deleteing the profile.'
 
+
+  $scope.problems = []
+
   $scope.profileGridOptions = {
     data: 'profiles'
     columnDefs: 'columnSet()'
     enableCellSelection: true
+  }
+
+  $scope.problemGridOptions = {
+    data: 'problems'
+    columnDefs: [
+      {
+        field: 'number',
+        displayName: 'Number'
+      }
+      {
+        field: 'title'
+        displayName: 'Title'
+      }
+      {
+        field: 'dacu'
+        name: 'DACU'
+      }
+      {
+        field: 'solvers.length'
+        name: 'Internal DACU'
+      }
+      {
+        field: 'solvers'
+        name: 'Solvers'
+      }
+    ]
   }
 
   $scope.addProfile = ->
