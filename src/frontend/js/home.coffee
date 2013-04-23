@@ -61,7 +61,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     Profile.query((profiles) ->
       for profile in profiles
         do (profile) ->
-          profile.color = (new $.color.HSL(miniHash(profile.name, 1000)/1000.0, 0.8, 0.8)).hex()
+          hash = miniHash(profile.name, 0xffffff)
+          profile.color = (new $.color.HSL((hash & 0xff)/0xff, 0.70 + ((hash >> 16) & 0xff)/0xff * 0.3, 0.75 + ((hash >> 8) & 0xff)/0xff * 0.25)).hex()
           if profile.uva.id?
             $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
               success((data) ->
