@@ -129,9 +129,6 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       field: 'tags'
       displayName: 'Tags'
       cellFilter: 'join'
-      editableCellTemplate: '''
-      <input type="hidden" ng-class="'colt' + col.index" ng-model="row.entity.tags" ui-select2="tagsSelect2" inject-transformers="tagsTransformer" multiple/>
-      '''
     }
     {
       field: 'uva.global_rank'
@@ -165,8 +162,13 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   ]
 
   adminColumns = _.map(defaultColumns, (def) ->
+    def = _.extend {}, def
     if def.field in ['name', 'uva.username', 'tags']
       def.enableCellEdit = true 
+      if def.field == 'tags'
+        def.editableCellTemplate = '''
+          <input type="hidden" ng-class="'colt' + col.index" ng-model="row.entity.tags" ui-select2="tagsSelect2" inject-transformers="tagsTransformer" multiple/>
+          '''
     def
   ).concat [
     {
