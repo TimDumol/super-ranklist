@@ -21,6 +21,24 @@ module.controller 'AddProfileCtrl', ['dialog', '$scope', (dialog, $scope) ->
     )
 ]
 
+# From: http://stackoverflow.com/questions/6491463/accessing-nested-javascript-objects-with-string-key
+`
+Object.byString = function(o, s) {
+    s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+    s = s.replace(/^\./, '');           // strip a leading dot
+    var a = s.split('.');
+    while (a.length) {
+        var n = a.shift();
+        if (n in o) {
+            o = o[n];
+        } else {
+            return;
+        }
+    }
+    return o;
+}
+`
+
 module.filter 'join', -> (x) -> _.str.join(',', x...)
 
 # hashes a string into an integer
@@ -109,11 +127,9 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
 
   $scope.tagsTransformer =
     fromModel: (x) ->
-      $log.log 'fromModel', x
       if x?
         ({id: y, text: y} for y in x)
     fromElement: (x) ->
-      $log.log 'fromElement', x
       if x?
         (_.str.trim(y.text) for y in x)
 
@@ -223,7 +239,6 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     fo = $scope.profileFilters
     excluded = (if fo.exclude?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.exclude.split(',')) else [])
     included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(',')) else [])
-    $log.log excluded, included
     $scope.filteredProfiles = _.reject($scope.profiles, (profile) ->
       for tag in excluded
         if _.find(profile.tags, (x) -> x.indexOf(tag) != -1)
@@ -243,7 +258,6 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     fo = $scope.filterOptions
     excluded = (if fo.exclude?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.exclude.split(';')) else [])
     included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(';')) else [])
-    $log.log excluded, included
     $scope.filteredProblems = _.reject($scope.problems, (prob) ->
       solverNames = (x.name.toLowerCase() for x in prob.solvers)
       for name in excluded
@@ -256,7 +270,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     )
 
   $scope.profileGridOptions = {
-    data: 'filteredProfiles'
+    data: 'sortedProfiles'
     columnDefs: 'columnSet()'
     enableCellSelection: true
     enableColumnResize: true
@@ -266,7 +280,22 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       fields: ['uva.n_solved']
       directions: ['desc']
     virtualizationThreshold: 100
+    useExternalSorting: true
   }
+
+  sortProfiles = ->
+    $log.log 'sorting'
+    sortInfo = $scope.profileGridOptions.sortInfo
+    field = sortInfo.fields[0]
+    profiles = _.sortBy($scope.filteredProfiles, (x) -> Object.byString(x, field))
+    $log.log sortInfo
+    if sortInfo.directions[0] in ['desc', 'DESC']
+      $log.log 'reversing'
+      profiles.reverse()
+    $log.log profiles
+    $scope.sortedProfiles = profiles
+  $scope.$watch 'profileGridOptions.sortInfo', sortProfiles, true
+  $scope.$watch 'filteredProfiles', sortProfiles
   
   $scope.problemGridOptions = {
     data: 'filteredProblems'
