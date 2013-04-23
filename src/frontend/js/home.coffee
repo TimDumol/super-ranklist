@@ -31,7 +31,7 @@ miniHash = (x, mod) ->
     u += (z*c.charCodeAt(0))
     z *= 17
   console.log x, mod, u, u %mod
-  (u*u ^ (u << 1) + 17 ) % mod
+  ((u*u ^ (u << 1) + 137 * u )*139*u*u + u) % mod
 
 
 module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dialog', 'Notify', '$http', '$q', 'LoadingNotification', ($log, $scope, CurrentUser, Profile, $dialog, Notify, $http, $q, LoadingNotification) ->
@@ -62,7 +62,11 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       for profile in profiles
         do (profile) ->
           hash = miniHash(profile.name, 0xffffff)
-          profile.color = (new $.color.HSL((hash & 0xff)/0xff, 0.70 + ((hash >> 16) & 0xff)/0xff * 0.3, 0.75 + ((hash >> 8) & 0xff)/0xff * 0.25)).hex()
+          hue = (hash & 0xff)/0xff
+          saturation = 0.70 + ((hash >> 16) & 0xff)/0xff * 0.3
+          lightness = ((hash >> 8) & 0xff)/0xff
+          profile.color = (new $.color.HSL(hue, saturation, lightness)).hex()
+          profile.foreground = (if lightness > 0.5 then '#000' else '#fff')
           if profile.uva.id?
             $http.get("#{uHuntURL}/subs/#{profile.uva.id}").
               success((data) ->
@@ -121,7 +125,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
       field: 'name'
       displayName: 'Name'
       cellTemplate: '''
-      <div class="ngCellText" ng-class="col.colIndex()" style="background-color: {{ row.entity.color }}">
+      <div class="ngCellText" ng-class="col.colIndex()" style="background-color: {{ row.entity.color }}; color: {{ row.entity.foreground }}">
         <span>{{row.getProperty(col.field)}}</span>
       </div>
       '''
