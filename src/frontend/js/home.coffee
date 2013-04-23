@@ -265,6 +265,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     sortInfo:
       fields: ['uva.n_solved']
       directions: ['desc']
+    virtualizationThreshold: 100
   }
   
   $scope.problemGridOptions = {
