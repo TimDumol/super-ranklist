@@ -48,7 +48,6 @@ miniHash = (x, mod) ->
   for c in x
     u += (z*c.charCodeAt(0))
     z *= 17
-  console.log x, mod, u, u %mod
   ((u*u ^ (u << 1) + 137 * u )*139*u*u + u) % mod
 
 
@@ -239,15 +238,24 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     fo = $scope.profileFilters
     excluded = (if fo.exclude?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.exclude.split(',')) else [])
     included = (if fo.include?.length > 0 then (_.str.trim(x).toLowerCase() for x in fo.include.split(',')) else [])
+    $log.log included
     $scope.filteredProfiles = _.reject($scope.profiles, (profile) ->
       for tag in excluded
         if _.find(profile.tags, (x) -> x.indexOf(tag) != -1)
           return true
-      for name in included
+      for tag in included
         unless _.find(profile.tags, (x) -> x.indexOf(tag) != -1)
           return true
       return false
     )
+
+  sortProblems = ->
+    sortInfo = $scope.problemGridOptions.sortInfo
+    field = sortInfo.fields[0]
+    problems = _.sortBy($scope.filteredProblems, (x) -> Object.byString(x, field))
+    if sortInfo.directions[0] in ['desc', 'DESC']
+      problems.reverse()
+    $scope.sortedProblems = problems
 
   $scope.problems = []
   $scope.filteredProblems = []
@@ -268,6 +276,8 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
           return true
       return false
     )
+  $scope.$watch 'problemGridOptions.sortInfo', sortProblems, true
+  $scope.$watch 'filteredProblems', sortProblems
 
   $scope.profileGridOptions = {
     data: 'sortedProfiles'
@@ -294,7 +304,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   $scope.$watch 'filteredProfiles', sortProfiles
   
   $scope.problemGridOptions = {
-    data: 'filteredProblems'
+    data: 'sortedProblems'
     columnDefs: [
       {
         field: 'number',
@@ -333,6 +343,7 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
     enableColumnResize: true
     showFilter: true
     showColumnMenu: true
+    useExternalSorting: true
     sortInfo:
       fields: ['solvers.length']
       directions: ['asc']
@@ -341,7 +352,6 @@ module.controller 'HomeCtrl', ['$log', '$scope', 'CurrentUser', 'Profile', '$dia
   $scope.addProfile = ->
     d = $dialog.dialog(templateUrl: '/templates/add-profile.html', controller: 'AddProfileCtrl')
     d.open().then (params) ->
-      $log.log params
       def = $q.defer()
       if params.uva.username?
         $http.get("#{uHuntURL}/uname2uid/#{params.uva.username}").success((id) ->
