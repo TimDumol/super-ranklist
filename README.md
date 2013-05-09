@@ -11,6 +11,7 @@ In one terminal
 
 ```
   % npm install express # Yes, just express
+  % npm install -g jade
   % bundle install
   % bundle exec guard -i
 ```
