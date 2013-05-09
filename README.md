@@ -10,7 +10,7 @@ First,
 In one terminal
 
 ```
-  % npm install expressa # Yes, just express
+  % npm install express # Yes, just express
   % bundle install
   % bundle exec guard -i
 ```
@@ -31,7 +31,7 @@ In another,
   % npm install
   % sudo npm install -g supervisor
   % nohup rethinkdb &
-  % cd ranklis/build/backend
+  % cd ranklist/build/backend
   % supervisor -w . server.js
 ```
 
